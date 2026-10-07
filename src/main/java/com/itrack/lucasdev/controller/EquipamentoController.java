@@ -2,6 +2,7 @@ package com.itrack.lucasdev.controller;
 
 import com.itrack.lucasdev.model.Equipamento;
 import com.itrack.lucasdev.service.EquipamentoService;
+import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -17,7 +18,7 @@ public class EquipamentoController {
     }
 
     @PostMapping
-    public Equipamento salvar(@RequestBody Equipamento equipamento) {
+    public Equipamento salvar(@Valid @RequestBody Equipamento equipamento) {
         return equipamentoService.salvarEquip(equipamento);
     }
 
@@ -36,7 +37,7 @@ public class EquipamentoController {
         return equipamentoService.atualizar(id, equipamento);
     }
 
-    @DeleteMapping
+    @DeleteMapping("/{id}")
     public void deletar(@PathVariable Integer id) {
         equipamentoService.deletar(id);
     }

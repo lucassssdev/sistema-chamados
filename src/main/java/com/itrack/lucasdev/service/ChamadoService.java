@@ -6,7 +6,10 @@ import com.itrack.lucasdev.model.Usuario;
 import com.itrack.lucasdev.repository.ChamadoRepository;
 import com.itrack.lucasdev.repository.EquipamentoRepository;
 import com.itrack.lucasdev.repository.UsuarioRepository;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
+
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -27,13 +30,23 @@ public class ChamadoService {
         chamado.setDataAbertura(LocalDateTime.now());
         chamado.setStatus(Chamado.StatusChamado.ABERTO);
 
-        Usuario usuario = usuarioRepository.findById(chamado.getUsuario().getId()).orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
+        if (chamado.getUsuario() == null || chamado.getUsuario().getId() == null) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "O usuário do chamado é obrigatório"
+            );
+        }
+
+        Usuario usuario = usuarioRepository.findById(chamado.getUsuario().getId())
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND,
+                        "Usuário não encontrado"
+                ));
 
         chamado.setUsuario(usuario);
 
         if (chamado.getEquipamento() != null && chamado.getEquipamento().getId() != null) {
-
-            Equipamento equipamento = equipamentoRepository.findById(chamado.getEquipamento().getId()).orElseThrow(() -> new RuntimeException("Equipamento não encontrado"));
+            Equipamento equipamento = equipamentoRepository.findById(chamado.getEquipamento().getId()).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Equipamento não encontrado"));
 
             chamado.setEquipamento(equipamento);
         }
@@ -46,16 +59,25 @@ public class ChamadoService {
     }
 
     public Chamado buscarChamado(Integer id) {
-        return chamadoRepository.findById(id).orElse(null);
+        return chamadoRepository.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Chamado não encontrado"));
     }
 
     public Chamado atualizar(Integer id, Chamado dados) {
         Chamado chamado = buscarChamado(id);
-        chamado.setTitulo(dados.getTitulo());
-        chamado.setDescricao(dados.getDescricao());
+
+        if (dados.getTitulo() != null) {
+            chamado.setTitulo(dados.getTitulo());
+        }
+
+        if (dados.getDescricao() != null) {
+            chamado.setDescricao(dados.getDescricao());
+        }
+
+        if (dados.getStatus() != null) {
+            chamado.setStatus(dados.getStatus());
+        }
 
         return chamadoRepository.save(chamado);
-
     }
 
     public void deletar(Integer id) {

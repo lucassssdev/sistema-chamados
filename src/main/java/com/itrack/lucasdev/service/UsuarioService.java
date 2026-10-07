@@ -4,7 +4,9 @@ import com.itrack.lucasdev.model.Setor;
 import com.itrack.lucasdev.model.Usuario;
 import com.itrack.lucasdev.repository.SetorRepository;
 import com.itrack.lucasdev.repository.UsuarioRepository;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 
@@ -20,12 +22,20 @@ public class UsuarioService {
     }
 
     public Usuario salvarUsuario(Usuario usuario) {
-        Integer idSetor = usuario.getSetor().getId();
+        if (usuario.getSetor() == null || usuario.getSetor().getId() == null) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "O setor do usuário é obrigatório"
+            );
+        }
 
-        Setor setor = setorRepository.findById(idSetor).orElseThrow(() -> new RuntimeException("Setor não encontrado"));
+        Setor setor = setorRepository.findById(usuario.getSetor().getId())
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND,
+                        "Setor não encontrado"
+                ));
 
         usuario.setSetor(setor);
-
         return usuarioRepository.save(usuario);
     }
 
@@ -34,12 +44,29 @@ public class UsuarioService {
     }
 
     public Usuario buscarUsuario(Integer id) {
-        return usuarioRepository.findById(id).orElse(null);
+        return usuarioRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND,
+                        "Usuário não encontrado"
+                ));
     }
 
     public Usuario atualizar(Integer id, Usuario dados) {
         Usuario usuario = buscarUsuario(id);
-        usuario.setNome(dados.getNome());
+
+        if (dados.getNome() != null) {
+            usuario.setNome(dados.getNome());
+        }
+
+        if (dados.getSetor() != null && dados.getSetor().getId() != null) {
+            Setor setor = setorRepository.findById(dados.getSetor().getId())
+                    .orElseThrow(() -> new ResponseStatusException(
+                            HttpStatus.NOT_FOUND,
+                            "Setor não encontrado"
+                    ));
+
+            usuario.setSetor(setor);
+        }
 
         return usuarioRepository.save(usuario);
     }

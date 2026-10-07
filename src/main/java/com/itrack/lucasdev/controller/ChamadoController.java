@@ -2,7 +2,9 @@ package com.itrack.lucasdev.controller;
 
 import com.itrack.lucasdev.model.Chamado;
 import com.itrack.lucasdev.service.ChamadoService;
+import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
+
 import java.util.List;
 
 @RestController
@@ -16,7 +18,7 @@ public class ChamadoController {
     }
 
     @PostMapping
-    public Chamado salvarChamado(@RequestBody Chamado chamado) {
+    public Chamado salvarChamado(@Valid @RequestBody Chamado chamado) {
         return chamadoService.salvarChamado(chamado);
     }
 
@@ -26,7 +28,7 @@ public class ChamadoController {
     }
 
     @GetMapping("/{id}")
-    public Chamado buscarChamado(Integer id) {
+    public Chamado buscarChamado(@PathVariable Integer id) {
         return chamadoService.buscarChamado(id);
     }
 

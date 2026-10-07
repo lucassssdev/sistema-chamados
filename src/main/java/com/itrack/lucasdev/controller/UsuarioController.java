@@ -2,6 +2,7 @@ package com.itrack.lucasdev.controller;
 
 import com.itrack.lucasdev.model.Usuario;
 import com.itrack.lucasdev.service.UsuarioService;
+import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -17,7 +18,7 @@ public class UsuarioController {
     }
 
     @PostMapping
-    public Usuario salvarUsuario(@RequestBody Usuario usuario) {
+    public Usuario salvarUsuario(@Valid @RequestBody Usuario usuario) {
         return usuarioService.salvarUsuario(usuario);
     }
 

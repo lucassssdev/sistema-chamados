@@ -2,6 +2,7 @@ package com.itrack.lucasdev.controller;
 
 import com.itrack.lucasdev.model.Setor;
 import com.itrack.lucasdev.service.SetorService;
+import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -17,7 +18,7 @@ public class SetorController {
     }
 
     @PostMapping
-    public Setor salvarSetor(@RequestBody Setor setor) {
+    public Setor salvarSetor(@Valid @RequestBody Setor setor) {
         return setorService.salvarSetor(setor);
     }
 

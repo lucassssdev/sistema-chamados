@@ -1,5 +1,8 @@
 package com.itrack.lucasdev.model;
+
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 
 @Entity
 @Table(name = "equipamento")
@@ -9,11 +12,18 @@ public class Equipamento {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
+    @NotBlank(message = "O nome é obrigatório")
     private String nome;
+
+    @NotNull(message = "O patrimônio é obrigatório")
     private Integer patrimonio;
+
+    @NotBlank(message = "O tipo é obrigatório")
     private String tipo;
+
     private String descricao;
 
+    @NotNull(message = "O setor é obrigatório")
     @ManyToOne
     @JoinColumn(name = "id_setor")
     private Setor setor;

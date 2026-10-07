@@ -34,6 +34,7 @@ CREATE TABLE chamado (
     titulo VARCHAR(150) NOT NULL,
     descricao VARCHAR(500) NOT NULL,
     data_abertura TIMESTAMP NOT NULL,
+    status VARCHAR(30) NOT NULL DEFAULT 'ABERTO',
     id_usuario INT NOT NULL,
     id_equipamento INT,
 

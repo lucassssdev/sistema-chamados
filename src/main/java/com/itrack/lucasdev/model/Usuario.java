@@ -1,5 +1,8 @@
 package com.itrack.lucasdev.model;
+
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 
 @Entity
 @Table(name = "usuario")
@@ -9,8 +12,10 @@ public class Usuario {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
+    @NotBlank(message = "O nome é obrigatório")
     private String nome;
 
+    @NotNull(message = "O setor é obrigatório")
     @ManyToOne
     @JoinColumn(name = "id_setor")
     private Setor setor;

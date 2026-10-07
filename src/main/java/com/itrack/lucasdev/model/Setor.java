@@ -1,5 +1,7 @@
 package com.itrack.lucasdev.model;
+
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
 
 @Entity
 @Table(name = "setor")
@@ -9,6 +11,7 @@ public class Setor {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
+    @NotBlank(message = "O nome do setor é obrigatório")
     private String nome;
 
     public Integer getId() {
@@ -27,4 +30,3 @@ public class Setor {
         this.nome = nome;
     }
 }
-

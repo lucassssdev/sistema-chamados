@@ -4,7 +4,10 @@ import com.itrack.lucasdev.model.Equipamento;
 import com.itrack.lucasdev.model.Setor;
 import com.itrack.lucasdev.repository.EquipamentoRepository;
 import com.itrack.lucasdev.repository.SetorRepository;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
+
 import java.util.List;
 
 @Service
@@ -19,18 +22,27 @@ public class EquipamentoService {
     }
 
     public Equipamento salvarEquip(Equipamento equipamento) {
-        boolean patrimonioEmUso = equipamentoRepository.existsByPatrimonio(equipamento.getPatrimonio());
-
-        if (patrimonioEmUso) {
-            throw new RuntimeException(
-                    "Este patrimônio já está sendo utilizado."
+        if (equipamentoRepository.existsByPatrimonio(equipamento.getPatrimonio())) {
+            throw new ResponseStatusException(
+                    HttpStatus.CONFLICT,
+                    "Este patrimônio já está sendo utilizado"
             );
         }
 
-        Setor setor = setorRepository.findById(equipamento.getSetor().getId()).orElseThrow(() -> new RuntimeException("Setor não encontrado"));
+        if (equipamento.getSetor() == null || equipamento.getSetor().getId() == null) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "O setor do equipamento é obrigatório"
+            );
+        }
+
+        Setor setor = setorRepository.findById(equipamento.getSetor().getId())
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND,
+                        "Setor não encontrado"
+                ));
 
         equipamento.setSetor(setor);
-
         return equipamentoRepository.save(equipamento);
     }
 
@@ -39,11 +51,14 @@ public class EquipamentoService {
     }
 
     public Equipamento buscarEquip(Integer id) {
-        return equipamentoRepository.findById(id).orElse(null);
+        return equipamentoRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND,
+                        "Equipamento não encontrado"
+                ));
     }
 
     public Equipamento atualizar(Integer id, Equipamento dados) {
-
         Equipamento equipamento = buscarEquip(id);
 
         if (dados.getNome() != null) {
@@ -59,12 +74,13 @@ public class EquipamentoService {
         }
 
         if (dados.getPatrimonio() != null) {
-
-            boolean patrimonioEmUso = equipamentoRepository.existsByPatrimonioAndIdNot(dados.getPatrimonio(), id);
+            boolean patrimonioEmUso = equipamentoRepository
+                    .existsByPatrimonioAndIdNot(dados.getPatrimonio(), id);
 
             if (patrimonioEmUso) {
-                throw new RuntimeException(
-                        "Este patrimônio já está sendo utilizado."
+                throw new ResponseStatusException(
+                        HttpStatus.CONFLICT,
+                        "Este patrimônio já está sendo utilizado"
                 );
             }
 
@@ -72,7 +88,11 @@ public class EquipamentoService {
         }
 
         if (dados.getSetor() != null && dados.getSetor().getId() != null) {
-            Setor setor = setorRepository.findById(dados.getSetor().getId()).orElseThrow(() -> new RuntimeException("Setor não encontrado"));
+            Setor setor = setorRepository.findById(dados.getSetor().getId())
+                    .orElseThrow(() -> new ResponseStatusException(
+                            HttpStatus.NOT_FOUND,
+                            "Setor não encontrado"
+                    ));
 
             equipamento.setSetor(setor);
         }
