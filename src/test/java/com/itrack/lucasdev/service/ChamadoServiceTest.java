@@ -1,5 +1,7 @@
 package com.itrack.lucasdev.service;
 
+import com.itrack.lucasdev.dto.ChamadoRequest;
+import com.itrack.lucasdev.dto.ChamadoResponse;
 import com.itrack.lucasdev.model.Chamado;
 import com.itrack.lucasdev.model.Usuario;
 import com.itrack.lucasdev.repository.ChamadoRepository;
@@ -39,39 +41,40 @@ public class ChamadoServiceTest {
         Usuario usuario = new Usuario();
         usuario.setId(1);
 
-        Chamado chamado = new Chamado();
-        chamado.setTitulo("Computador explodiu! :(");
-        chamado.setDescricao("O computador explodiu vei");
-        chamado.setUsuario(usuario);
+        ChamadoRequest request = new ChamadoRequest(
+                "Computador explodiu! :(",
+                "O computador explodiu vei",
+                1,      // usuarioId
+                null    // equipamentoId
+        );
 
         when(usuarioRepository.findById(1))
                 .thenReturn(Optional.of(usuario));
-
+        
         when(chamadoRepository.save(any(Chamado.class)))
                 .thenAnswer(invocacao -> invocacao.getArgument(0));
 
-        Chamado resultado = chamadoService.salvarChamado(chamado);
+        ChamadoResponse resultado = chamadoService.salvarChamado(request);
 
-        assertEquals(Chamado.StatusChamado.ABERTO, resultado.getStatus());
+        assertEquals(Chamado.StatusChamado.ABERTO, resultado.status());
     }
 
     @Test
     void deveRejeitarChamadoCasoUsuarioInexistente() {
 
-        Usuario usuario = new Usuario();
-        usuario.setId(999);
-
-        Chamado chamado = new Chamado();
-        chamado.setTitulo("Computador explodiu! :(");
-        chamado.setDescricao("O computador explodiu vei");
-        chamado.setUsuario(usuario);
+        ChamadoRequest request = new ChamadoRequest(
+                "Computador explodiu! :(",
+                "O computador explodiu vei",
+                999,    // usuarioId que não existe
+                null
+        );
 
         when(usuarioRepository.findById(999))
                 .thenReturn(Optional.empty());
 
         assertThrows(
                 ResponseStatusException.class,
-                () -> chamadoService.salvarChamado(chamado)
+                () -> chamadoService.salvarChamado(request)
         );
 
         verify(chamadoRepository, never())
@@ -84,10 +87,12 @@ public class ChamadoServiceTest {
         Usuario usuario = new Usuario();
         usuario.setId(1);
 
-        Chamado chamado = new Chamado();
-        chamado.setTitulo("Problema de acesso");
-        chamado.setDescricao("Usuário não consegue acessar o sistema");
-        chamado.setUsuario(usuario);
+        ChamadoRequest request = new ChamadoRequest(
+                "Problema de acesso",
+                "Usuário não consegue acessar o sistema",
+                1,
+                null
+        );
 
         when(usuarioRepository.findById(1))
                 .thenReturn(Optional.of(usuario));
@@ -95,12 +100,12 @@ public class ChamadoServiceTest {
         when(chamadoRepository.save(any(Chamado.class)))
                 .thenAnswer(invocacao -> invocacao.getArgument(0));
 
-        Chamado resultado = chamadoService.salvarChamado(chamado);
+        ChamadoResponse resultado = chamadoService.salvarChamado(request);
 
         assertNotNull(resultado);
-        assertNull(resultado.getEquipamento());
-        assertEquals(Chamado.StatusChamado.ABERTO, resultado.getStatus());
-        assertNotNull(resultado.getDataAbertura());
+        assertNull(resultado.equipamentoId());
+        assertEquals(Chamado.StatusChamado.ABERTO, resultado.status());
+        assertNotNull(resultado.dataAbertura());
 
         verify(chamadoRepository, times(1))
                 .save(any(Chamado.class));
