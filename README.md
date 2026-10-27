@@ -32,6 +32,7 @@ Atualmente a aplicação permite:
 - Maven
 - Postman
 - Git / GitHub
+- Spring Security (configuração inicial)
 
 
 ## Próximas melhorias
